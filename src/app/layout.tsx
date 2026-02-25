@@ -9,6 +9,9 @@ import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 import { ThemeBootScript } from "@/scripts/theme-boot";
 import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
 
+import { AuthProvider } from "@/components/providers/auth-provider";
+import { QueryProvider } from "@/components/providers/query-provider";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -36,16 +39,20 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <ThemeBootScript />
       </head>
       <body className={`${fontVars} min-h-screen antialiased`} suppressHydrationWarning>
-        <PreferencesStoreProvider
-          themeMode={theme_mode}
-          themePreset={theme_preset}
-          contentLayout={content_layout}
-          navbarStyle={navbar_style}
-          font={font}
-        >
-          {children}
-          <Toaster />
-        </PreferencesStoreProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <PreferencesStoreProvider
+              themeMode={theme_mode}
+              themePreset={theme_preset}
+              contentLayout={content_layout}
+              navbarStyle={navbar_style}
+              font={font}
+            >
+              {children}
+              <Toaster />
+            </PreferencesStoreProvider>
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

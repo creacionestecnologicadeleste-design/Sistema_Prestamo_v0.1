@@ -10,6 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 const FormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -17,6 +21,9 @@ const FormSchema = z.object({
 });
 
 export function LoginForm() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -27,13 +34,27 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    toast("You submitted the following values", {
-      description: (
-        <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Credenciales inválidas. Por favor intente de nuevo.");
+      } else {
+        toast.success("Inicio de sesión exitoso");
+        router.push("/dashboard/crm");
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("Ocurrió un error al intentar iniciar sesión.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,8 +111,8 @@ export function LoginForm() {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          Login
+        <Button className="w-full" type="submit" disabled={loading}>
+          {loading ? "Iniciando sesión..." : "Login"}
         </Button>
       </form>
     </Form>

@@ -1,6 +1,10 @@
-import { InsightCards } from "./_components/insight-cards";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const OverviewCards = dynamic(() => import("./_components/overview-cards").then(mod => mod.OverviewCards), { ssr: false });
+const InsightCards = dynamic(() => import("./_components/insight-cards").then(mod => mod.InsightCards), { ssr: false });
 import { OperationalCards } from "./_components/operational-cards";
-import { OverviewCards } from "./_components/overview-cards";
 import { TableCards } from "./_components/table-cards";
 
 export default function Page() {

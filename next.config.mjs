@@ -1,20 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactCompiler: true,
-  compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
-  },
-  async redirects() {
+  redirects: async () => {
     return [
       {
         source: "/dashboard",
         destination: "/dashboard/crm",
-        permanent: false,
+        permanent: true,
+      },
+      {
+        source: "/dashboard/default",
+        destination: "/dashboard/crm",
+        permanent: true,
       },
     ];
-  },
-  experimental: {
-    allowedDevOrigins: ["http://172.16.0.25:3000", "http://localhost:3000"],
   },
 };
 
