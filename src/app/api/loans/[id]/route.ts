@@ -5,11 +5,12 @@ import { eq } from 'drizzle-orm';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const loan = await db.query.loans.findFirst({
-            where: eq(loans.id, params.id),
+            where: eq(loans.id, id),
             with: {
                 client: true,
                 schedule: {
@@ -31,13 +32,14 @@ export async function GET(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const result = await db.transaction(async (tx) => {
             // Delete schedule first due to FK constraints if not using cascade
-            await tx.delete(amortizationSchedule).where(eq(amortizationSchedule.loanId, params.id));
-            const [deletedLoan] = await tx.delete(loans).where(eq(loans.id, params.id)).returning();
+            await tx.delete(amortizationSchedule).where(eq(amortizationSchedule.loanId, id));
+            const [deletedLoan] = await tx.delete(loans).where(eq(loans.id, id)).returning();
             return deletedLoan;
         });
 

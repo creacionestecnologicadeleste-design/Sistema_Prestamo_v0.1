@@ -6,11 +6,12 @@ import { eq } from 'drizzle-orm';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const client = await db.query.clients.findFirst({
-            where: eq(clients.id, params.id),
+            where: eq(clients.id, id),
         });
 
         if (!client) {
@@ -26,8 +27,9 @@ export async function GET(
 
 export async function PUT(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const json = await request.json();
         const validatedData = clientSchema.partial().parse(json);
@@ -38,7 +40,7 @@ export async function PUT(
                 ...validatedData,
                 monthlyIncome: validatedData.monthlyIncome?.toString(),
             })
-            .where(eq(clients.id, params.id))
+            .where(eq(clients.id, id))
             .returning();
 
         if (!updatedClient) {
@@ -57,12 +59,13 @@ export async function PUT(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     try {
         const [deletedClient] = await db
             .delete(clients)
-            .where(eq(clients.id, params.id))
+            .where(eq(clients.id, id))
             .returning();
 
         if (!deletedClient) {
